@@ -57,7 +57,10 @@ def precipitation():
 
     """Return a list of all passenger names"""
     # Query all passengers
-    results = session.query(Measurement.date, Measurement.prcp).all()
+    results = session.query(Measurement.date, Measurement.prcp).\
+        filter(Measurement.date >= "2016-08-23").\
+        filter(Measurement.date <= "2017-08-23").all()
+
 
     session.close()
     # Create a dictionary from the row data and append to a list of all_passengers
@@ -124,25 +127,21 @@ def startDate(startdt):
 
     """Return a list of passenger data including the name, age, and sex of each passenger"""
     # Query all passengers
-    sel = [Measurement.station, 
-       Station.name, 
+    sel = [
        func.min(Measurement.tobs), 
        func.max(Measurement.tobs), 
        func.avg(Measurement.tobs)]
 
+    # order by is not required, since it is only an record, but included
     results = session.query(*sel).\
-        filter(Measurement.station == Station.station).\
-        filter(Measurement.date > startdt ).\
-        group_by(Measurement.station).\
+        filter(Measurement.date >= startdt ).\
         order_by(func.count(1).desc()).all()
 
     session.close()
     # Create a dictionary from the row data and append to a list of all_passengers
     all_temp = []
-    for station, name, minTemp, maxTemp, avgTemp in results:
+    for minTemp, maxTemp, avgTemp in results:
         temp_dict = {}
-        temp_dict["station"] = station
-        temp_dict["name"] = name
         temp_dict["minTemp"] = minTemp
         temp_dict["maxTemp"] = maxTemp
         temp_dict["avgTemp"] = avgTemp
@@ -161,26 +160,22 @@ def startEndDate(startdt, enddt):
 
     """Return a list of passenger data including the name, age, and sex of each passenger"""
     # Query all passengers
-    sel = [Measurement.station, 
-       Station.name, 
+    sel = [
        func.min(Measurement.tobs), 
        func.max(Measurement.tobs), 
        func.avg(Measurement.tobs)]
-
+       
+    # order by is not required, since it is only an record, but included
     results = session.query(*sel).\
-        filter(Measurement.station == Station.station).\
-        filter(Measurement.date > startdt ).\
-        filter(Measurement.date < enddt ).\
-        group_by(Measurement.station).\
+        filter(Measurement.date >= startdt ).\
+        filter(Measurement.date <= enddt ).\
         order_by(func.count(1).desc()).all()
 
     session.close()
     # Create a dictionary from the row data and append to a list of all_passengers
     all_temp = []
-    for station, name, minTemp, maxTemp, avgTemp in results:
+    for minTemp, maxTemp, avgTemp in results:
         temp_dict = {}
-        temp_dict["station"] = station
-        temp_dict["name"] = name
         temp_dict["minTemp"] = minTemp
         temp_dict["maxTemp"] = maxTemp
         temp_dict["avgTemp"] = avgTemp
